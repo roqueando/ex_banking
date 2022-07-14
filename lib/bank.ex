@@ -59,6 +59,17 @@ defmodule Bank do
     end
   end
 
+  def get_balance(user, currency) do
+    case get_user(user) do
+      nil ->
+        {:error, :user_does_not_exist}
+
+      {_user, balances} ->
+        normalized_currency = normalize_currency(currency)
+        {:ok, Map.get(balances, normalized_currency, 0)}
+    end
+  end
+
   defp apply_deposit(user, balances, currency, amount) do
     case Map.get(balances, currency) do
       nil ->

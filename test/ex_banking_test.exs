@@ -26,13 +26,9 @@ defmodule ExBankingTest do
   end
 
   describe "deposit/3" do
-    test "should deposit an amount with currency", %{deposit_user: user} do
-      assert {:ok, balance} = ExBanking.deposit(user, 30.50, "brl")
-      assert balance == 30.50
-      assert {"user_deposit", %{brl: 30.50}} = Bank.get_user(user)
-    end
-
     test "should deposit an amount with another currency", %{deposit_user: user} do
+      assert {:ok, brl_balance} = ExBanking.deposit(user, 30.50, "brl")
+      assert brl_balance == 30.50
       assert {:ok, balance} = ExBanking.deposit(user, 15.50, "usd")
       assert balance == 15.50
       {_user, balances} = Bank.get_user(user)
@@ -61,6 +57,13 @@ defmodule ExBankingTest do
       assert {:error, :wrong_arguments} = ExBanking.withdraw("user_withdraw", 30.50, nil)
       assert {:error, :wrong_arguments} = ExBanking.withdraw(nil, nil, nil)
       assert {:error, :wrong_arguments} = ExBanking.withdraw("user_withdraw", -12, "brl")
+    end
+  end
+
+  describe "get_balance/2" do
+    test "should return the balance from deposit user", %{deposit_user: user} do
+      {:ok, balance} = ExBanking.get_balance(user, "brl")
+      assert balance != 0
     end
   end
 end

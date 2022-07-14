@@ -68,4 +68,20 @@ defmodule ExBanking do
         {:ok, new_balance}
     end
   end
+
+  @spec get_balance(String.t(), String.t()) ::
+          {:ok, number()}
+          | {:error, :wrong_arguments | :user_does_not_exists | :too_many_requests_to_user}
+  def get_balance(user, currency) do
+    case Bank.get_balance(user, currency) do
+      {:error, :user_does_not_exist} ->
+        {:error, :user_does_not_exist}
+
+      {:error, :too_many_requests_to_user} ->
+        {:error, :too_many_requests_to_user}
+
+      {:ok, balance} ->
+        {:ok, balance}
+    end
+  end
 end
