@@ -63,7 +63,22 @@ defmodule ExBankingTest do
   describe "get_balance/2" do
     test "should return the balance from deposit user", %{deposit_user: user} do
       {:ok, balance} = ExBanking.get_balance(user, "brl")
-      assert balance != 0
+      assert balance != 0.0
+    end
+  end
+
+  describe "send/4" do
+    test "should send 10 brl from user_a to user_b" do
+      user_a = "User A"
+      user_b = "User B"
+      ExBanking.create_user(user_a)
+      ExBanking.create_user(user_b)
+      ExBanking.deposit(user_a, 10.0, "brl")
+      ExBanking.deposit(user_b, 10.0, "brl")
+
+      {:ok, from_user_balance, to_user_balance} = ExBanking.send(user_a, user_b, 5.0, "brl")
+      assert from_user_balance == 5.0
+      assert to_user_balance == 15.0
     end
   end
 end

@@ -59,6 +59,10 @@ defmodule Bank do
     end
   end
 
+  @doc """
+    Get the user balance
+    if user does not exist will return a tuple error
+  """
   def get_balance(user, currency) do
     case get_user(user) do
       nil ->
@@ -67,6 +71,33 @@ defmodule Bank do
       {_user, balances} ->
         normalized_currency = normalize_currency(currency)
         {:ok, Map.get(balances, normalized_currency, 0)}
+    end
+  end
+
+  @doc """
+    Send an amount in currency from an user to another
+  """
+  def send(from_user, to_user, amount, currency) do
+    case {get_user(from_user), get_user(to_user)} do
+      {nil, _} ->
+        {:error, :sender_does_not_exist}
+
+      {_, nil} ->
+        {:error, :receiver_does_not_exist}
+
+      {_, _} ->
+        apply_transfer(from_user, to_user, amount, currency)
+    end
+  end
+
+  defp apply_transfer(from_user, to_user, amount, currency) do
+    case withdraw(from_user, amount, currency) do
+      {:error, :not_enough_money} ->
+        {:error, :not_enough_money}
+
+      {:ok, from_user_balance} ->
+        {:ok, to_user_balance} = deposit(to_user, amount, currency)
+        {:ok, from_user_balance, to_user_balance}
     end
   end
 
