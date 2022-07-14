@@ -1,21 +1,23 @@
 # ExBanking
 
-**TODO: Add description**
+Yolo group test
 
-## Installation
+## Running tests
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ex_banking` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:ex_banking, "~> 0.1.0"}
-  ]
-end
+```sh
+mix test
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/ex_banking>.
+## Main features
 
+- Create user
+```elixir
+ExBanking.create_user("User Test")
+> :ok
+```
+
+- Deposit to an user
+```elixir
+ExBanking.deposit("User Test", 30.50, "brl")
+> {:ok, 30.50}
+```
