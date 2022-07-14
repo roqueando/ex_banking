@@ -18,7 +18,7 @@ defmodule Bank do
     case get_user(user) do
       nil ->
         normalized_user = normalize_user(user)
-        :ets.insert(:users, {normalized_user, [brl: 0.0]})
+        :ets.insert(:users, {normalized_user, %{brl: 0.0}})
         get_user(normalized_user)
 
       _ ->
@@ -38,13 +38,52 @@ defmodule Bank do
       {user, balances} ->
         normalized_currency = normalize_currency(currency)
 
-        updated_balances =
-          Keyword.update(balances, normalized_currency, amount, fn value ->
-            value + amount
-          end)
+        apply_deposit(user, balances, normalized_currency, amount)
+    end
+  end
+
+  @doc """
+    Withdraw a value into user
+    if user does not exists will return a tuple error
+    if user has no not_enough_money will return a tuple error
+  """
+  def withdraw(user, amount, currency) do
+    case get_user(user) do
+      nil ->
+        {:error, :user_does_not_exist}
+
+      {user, balances} ->
+        normalized_currency = normalize_currency(currency)
+
+        apply_withdraw(user, balances, normalized_currency, amount)
+    end
+  end
+
+  defp apply_deposit(user, balances, currency, amount) do
+    case Map.get(balances, currency) do
+      nil ->
+        updated_balances = Map.put(balances, currency, amount)
+        :ets.insert(:users, {user, updated_balances})
+        {:ok, Map.get(updated_balances, currency)}
+
+      current_amount ->
+        updated_balances = Map.put(balances, currency, amount + current_amount)
 
         :ets.insert(:users, {user, updated_balances})
-        {:ok, updated_balances[normalized_currency]}
+        {:ok, Map.get(updated_balances, currency)}
+    end
+  end
+
+  defp apply_withdraw(user, balances, currency, amount) do
+    case Map.get(balances, currency) do
+      balance when balance <= 0.0 ->
+        {:error, :not_enough_money}
+
+      current_amount ->
+        updated_balances = Map.put(balances, currency, current_amount - amount)
+
+        :ets.insert(:users, {user, updated_balances})
+        {:ok, Map.get(updated_balances, currency)}
     end
   end
 

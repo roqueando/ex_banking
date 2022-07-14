@@ -21,3 +21,9 @@ ExBanking.create_user("User Test")
 ExBanking.deposit("User Test", 30.50, "brl")
 > {:ok, 30.50}
 ```
+
+- Withdraw from user
+```elixir
+ExBanking.withdraw("User Test", 10.00, "brl")
+> {:ok, 20.50}
+```

@@ -40,7 +40,32 @@ defmodule ExBanking do
     end
   end
 
-  def get_user(user), do: GenServer.call(Bank, {:get_user, user})
+  @spec withdraw(String.t(), number(), String.t()) ::
+          {:ok, number()}
+          | {:error,
+             :wrong_arguments
+             | :user_does_not_exists
+             | :not_enough_money
+             | :too_many_requests_to_user}
+  def withdraw(nil, _amount, _currency), do: {:error, :wrong_arguments}
+  def withdraw(_user, nil, _currency), do: {:error, :wrong_arguments}
+  def withdraw(_user, _amount, nil), do: {:error, :wrong_arguments}
+  def withdraw(nil, nil, nil), do: {:error, :wrong_arguments}
+  def withdraw(_, amount, _currency) when amount < 0, do: {:error, :wrong_arguments}
 
-  def normalize_user(%{user: user}), do: String.capitalize(user) |> String.replace("_", " ")
+  def withdraw(user, amount, currency) do
+    case Bank.withdraw(user, amount, currency) do
+      {:error, :user_does_not_exist} ->
+        {:error, :user_does_not_exist}
+
+      {:error, :not_enough_money} ->
+        {:error, :not_enough_money}
+
+      {:error, :too_many_requests_to_user} ->
+        {:error, :too_many_requests_to_user}
+
+      {:ok, new_balance} ->
+        {:ok, new_balance}
+    end
+  end
 end
