@@ -27,3 +27,20 @@ ExBanking.deposit("User Test", 30.50, "brl")
 ExBanking.withdraw("User Test", 10.00, "brl")
 > {:ok, 20.50}
 ```
+
+- Get Balance from user
+```elixir
+ExBanking.deposit("User Test", 30.50, "brl")
+ExBanking.get_balance("User Test", "brl")
+> {:ok, 30.50}
+```
+
+- Send from user to another user
+```elixir
+ExBanking.create_user("User A")
+ExBanking.create_user("User B")
+ExBanking.deposit("User A", 10.00, "brl")
+ExBanking.deposit("User B", 10.00, "brl")
+ExBanking.send("User A", "User B", 5.00, "brl")
+> {:ok, 5.00, 15.00}
+```

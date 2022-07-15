@@ -18,7 +18,7 @@ defmodule Bank do
     case get_user(user) do
       nil ->
         normalized_user = normalize_user(user)
-        :ets.insert(:users, {normalized_user, %{brl: 0.0}})
+        :ets.insert(:users, {normalized_user, %{brl: normalize_amount(0.0)}})
         get_user(normalized_user)
 
       _ ->
@@ -70,7 +70,7 @@ defmodule Bank do
 
       {_user, balances} ->
         normalized_currency = normalize_currency(currency)
-        {:ok, Map.get(balances, normalized_currency, 0)}
+        {:ok, Map.get(balances, normalized_currency, 0) |> normalize_amount()}
     end
   end
 
@@ -106,13 +106,13 @@ defmodule Bank do
       nil ->
         updated_balances = Map.put(balances, currency, amount)
         :ets.insert(:users, {user, updated_balances})
-        {:ok, Map.get(updated_balances, currency)}
+        {:ok, Map.get(updated_balances, currency) |> normalize_amount()}
 
       current_amount ->
         updated_balances = Map.put(balances, currency, amount + current_amount)
 
         :ets.insert(:users, {user, updated_balances})
-        {:ok, Map.get(updated_balances, currency)}
+        {:ok, Map.get(updated_balances, currency) |> normalize_amount()}
     end
   end
 
@@ -125,7 +125,7 @@ defmodule Bank do
         updated_balances = Map.put(balances, currency, current_amount - amount)
 
         :ets.insert(:users, {user, updated_balances})
-        {:ok, Map.get(updated_balances, currency)}
+        {:ok, Map.get(updated_balances, currency) |> normalize_amount()}
     end
   end
 
@@ -133,7 +133,8 @@ defmodule Bank do
   def get_user(nil), do: nil
 
   def get_user(user) do
-    :ets.lookup(:users, normalize_user(user)) |> List.first()
+    :ets.lookup(:users, normalize_user(user))
+    |> List.first()
   end
 
   defp normalize_user(user),
@@ -141,4 +142,6 @@ defmodule Bank do
 
   defp normalize_currency(currency),
     do: String.trim(currency) |> String.downcase() |> String.to_atom()
+
+  defp normalize_amount(amount), do: Float.round(amount, 2)
 end
