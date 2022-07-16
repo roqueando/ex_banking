@@ -55,14 +55,14 @@ defmodule ExBanking do
 
   def withdraw(user, amount, currency) do
     case Bank.withdraw(user, amount, currency) do
+      {:error, :too_many_requests_to_user} ->
+        {:error, :too_many_requests_to_user}
+
       {:error, :user_does_not_exist} ->
         {:error, :user_does_not_exist}
 
       {:error, :not_enough_money} ->
         {:error, :not_enough_money}
-
-      {:error, :too_many_requests_to_user} ->
-        {:error, :too_many_requests_to_user}
 
       {:ok, new_balance} ->
         {:ok, new_balance}
@@ -78,11 +78,11 @@ defmodule ExBanking do
 
   def get_balance(user, currency) do
     case Bank.get_balance(user, currency) do
-      {:error, :user_does_not_exist} ->
-        {:error, :user_does_not_exist}
-
       {:error, :too_many_requests_to_user} ->
         {:error, :too_many_requests_to_user}
+
+      {:error, :user_does_not_exist} ->
+        {:error, :user_does_not_exist}
 
       {:ok, balance} ->
         {:ok, balance}

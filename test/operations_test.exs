@@ -1,28 +1,35 @@
 defmodule OperationsTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
-  test "insert a operation" do
-    Operation.insert("user_a", "deposit")
-    operations = Operation.get("user_a")
-    operation = List.first(operations)
-
-    assert %{user: "user_a", type: "deposit", status: :pending} = operation
+  setup do
+    user = "user_operation_test_a"
+    %{user: user}
   end
 
-  test "insert a operation wait a second and check if does have nothing" do
-    Operation.insert("user_a", "deposit")
+  test "insert a operation", %{user: user} do
+    Operation.insert(user, "deposit")
+    operations = Operation.get(user)
+    operation = List.first(operations)
+
+    assert %{user: ^user, type: "deposit", status: :pending} = operation
+  end
+
+  test "insert a operation wait a second and check if does have nothing", %{user: user} do
+    Operation.insert(user, "deposit")
     :timer.sleep(1000)
-    operations = Operation.get("user_a")
+    operations = Operation.get(user)
 
     assert operations == []
   end
 
   test "insert 10 operations" do
+    new_user = "New User"
+
     for _ <- 1..10 do
-      Operation.insert("user_a", "deposit")
+      Operation.insert(new_user, "deposit")
     end
 
-    operations = Operation.get("user_a")
+    operations = Operation.get(new_user)
 
     assert length(operations) == 10
   end

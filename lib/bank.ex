@@ -75,12 +75,16 @@ defmodule Bank do
     if user does not exist will return a tuple error
   """
   def get_balance(user, currency) do
-    case get_user(user) do
-      nil ->
+    case {get_user(user), check_operations(user, :normal)} do
+      {nil, 0} ->
         {:error, :user_does_not_exist}
 
-      {_user, balances} ->
+      {_, operations} when operations >= 10 ->
+        {:error, :too_many_requests_to_user}
+
+      {{_user, balances}, operations} when operations < 10 ->
         normalized_currency = Helpers.normalize_currency(currency)
+        Operation.insert(user, "get_balance")
         {:ok, Map.get(balances, normalized_currency, 0) |> Helpers.normalize_amount()}
     end
   end
@@ -103,11 +107,23 @@ defmodule Bank do
 
   defp apply_transfer(from_user, to_user, amount, currency) do
     case withdraw(from_user, amount, currency) do
+      {:error, :too_many_requests_to_user} ->
+        {:error, :too_many_requests_to_sender}
+
       {:error, :not_enough_money} ->
         {:error, :not_enough_money}
 
       {:ok, from_user_balance} ->
-        {:ok, to_user_balance} = deposit(to_user, amount, currency)
+        deposit_to_receiver(from_user_balance, to_user, amount, currency)
+    end
+  end
+
+  defp deposit_to_receiver(from_user_balance, user, amount, currency) do
+    case deposit(user, amount, currency) do
+      {:error, :too_many_requests_to_user} ->
+        {:error, :too_many_requests_to_receiver}
+
+      {:ok, to_user_balance} ->
         {:ok, from_user_balance, to_user_balance}
     end
   end

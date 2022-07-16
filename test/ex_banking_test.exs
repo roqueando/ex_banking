@@ -124,4 +124,16 @@ defmodule ExBankingTest do
     assert {:error, :too_many_requests_to_user} =
              ExBanking.withdraw(user_operation_b, 10.00, "brl")
   end
+
+  test "operation: get balance more than 10 requests" do
+    user_operation_c = "User Operation C"
+    ExBanking.create_user(user_operation_c)
+    ExBanking.deposit(user_operation_c, 100.0, "brl")
+
+    for _ <- 1..10 do
+      ExBanking.get_balance(user_operation_c, "brl")
+    end
+
+    assert {:error, :too_many_requests_to_user} = ExBanking.get_balance(user_operation_c, "brl")
+  end
 end
