@@ -51,4 +51,4 @@ Every time the system run an operation like deposit, withdraw or send the system
 
 ### So how the operation state works? 
 
-When the user do an operation will be created an operation with the user, the type of operation (deposit, withdraw or send) and with an status. To simulate a queue I put every 1 second will remove one operation from state turning free the user operations to run another one. If the user has 10 operation and try to do another one, the system returns that user has too much requests, and after one second the user can try again because the queue will be free.
+When the user do an operation, will be created an operation with the user, the type of operation (deposit, withdraw or send) and a status. To simulate a queue, every 1 second will remove one operation from state, turning free the user operations to run another one. If the user has 10 operation and try to do another one, the system returns that user has too much requests, and after one second the user can try again because the queue will be free.
