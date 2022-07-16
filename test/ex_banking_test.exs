@@ -136,4 +136,34 @@ defmodule ExBankingTest do
 
     assert {:error, :too_many_requests_to_user} = ExBanking.get_balance(user_operation_c, "brl")
   end
+
+  test "operation: send from user D to user E than 10 requests to user D" do
+    user_operation_d = "User Operation D"
+    user_operation_e = "User Operation E"
+    ExBanking.create_user(user_operation_d)
+    ExBanking.create_user(user_operation_e)
+
+    for _ <- 1..10 do
+      ExBanking.deposit(user_operation_d, 10.0, "brl")
+    end
+
+    assert {:error, :too_many_requests_to_sender} =
+             ExBanking.send(user_operation_d, user_operation_e, 10.0, "brl")
+  end
+
+  test "operation: send from user F to user G than 10 requests to user G" do
+    user_operation_f = "User Operation F"
+    user_operation_g = "User Operation G"
+    ExBanking.create_user(user_operation_f)
+    ExBanking.create_user(user_operation_g)
+
+    ExBanking.deposit(user_operation_f, 20.0, "brl")
+
+    for _ <- 1..10 do
+      ExBanking.deposit(user_operation_g, 10.0, "brl")
+    end
+
+    assert {:error, :too_many_requests_to_receiver} =
+             ExBanking.send(user_operation_f, user_operation_g, 10.0, "brl")
+  end
 end
