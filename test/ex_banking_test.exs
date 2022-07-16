@@ -92,4 +92,16 @@ defmodule ExBankingTest do
       assert {:error, :sender_does_not_exist} = ExBanking.send("User A2", user_b2, 5.0, "brl")
     end
   end
+
+  test "operation: deposit more than 10 requests" do
+    user_operation_a = "User Operation A"
+    ExBanking.create_user(user_operation_a)
+
+    for _ <- 1..10 do
+      ExBanking.deposit(user_operation_a, 10.00, "brl")
+    end
+
+    assert {:error, :too_many_requests_to_user} =
+             ExBanking.deposit(user_operation_a, 10.00, "brl")
+  end
 end

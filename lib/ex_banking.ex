@@ -29,11 +29,11 @@ defmodule ExBanking do
 
   def deposit(user, amount, currency) do
     case Bank.deposit(user, amount, currency) do
-      {:error, :user_does_not_exist} ->
-        {:error, :user_does_not_exist}
-
       {:error, :too_many_requests_to_user} ->
         {:error, :too_many_requests_to_user}
+
+      {:error, :user_does_not_exist} ->
+        {:error, :user_does_not_exist}
 
       {:ok, new_balance} ->
         {:ok, new_balance}

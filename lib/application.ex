@@ -6,7 +6,8 @@ defmodule ExBanking.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Bank, []}
+      {Bank, []},
+      {Operation, []}
     ]
 
     opts = [strategy: :one_for_one, name: ExBanking.Supervisor]

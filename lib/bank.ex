@@ -34,15 +34,17 @@ defmodule Bank do
     if user does not exists will return a tuple error
   """
   def deposit(user, amount, currency) do
-    Operation.insert(user, "deposit")
-
-    case get_user(user) do
-      nil ->
+    case {get_user(user), check_operations(user, :normal)} do
+      {nil, 0} ->
         {:error, :user_does_not_exist}
 
-      {user, balances} ->
+      {_, operations} when operations >= 10 ->
+        {:error, :too_many_requests_to_user}
+
+      {{user, balances}, operations} when operations < 10 ->
         normalized_currency = Helpers.normalize_currency(currency)
 
+        Operation.insert(user, "deposit")
         apply_deposit(user, balances, normalized_currency, amount)
     end
   end
@@ -141,4 +143,6 @@ defmodule Bank do
     :ets.lookup(:users, Helpers.normalize_user(user))
     |> List.first()
   end
+
+  def check_operations(user, :normal), do: Operation.get(user) |> length()
 end
