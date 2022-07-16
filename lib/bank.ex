@@ -55,13 +55,17 @@ defmodule Bank do
     if user has no not_enough_money will return a tuple error
   """
   def withdraw(user, amount, currency) do
-    case get_user(user) do
-      nil ->
+    case {get_user(user), check_operations(user, :normal)} do
+      {nil, 0} ->
         {:error, :user_does_not_exist}
 
-      {user, balances} ->
+      {_, operations} when operations >= 10 ->
+        {:error, :too_many_requests_to_user}
+
+      {{user, balances}, operations} when operations < 10 ->
         normalized_currency = Helpers.normalize_currency(currency)
 
+        Operation.insert(user, "withdraw")
         apply_withdraw(user, balances, normalized_currency, amount)
     end
   end
@@ -126,6 +130,9 @@ defmodule Bank do
   defp apply_withdraw(user, balances, currency, amount) do
     case Map.get(balances, currency) do
       balance when balance <= 0.0 ->
+        {:error, :not_enough_money}
+
+      balance when amount > balance ->
         {:error, :not_enough_money}
 
       current_amount ->

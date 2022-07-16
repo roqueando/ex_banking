@@ -58,6 +58,13 @@ defmodule ExBankingTest do
       assert {:error, :wrong_arguments} = ExBanking.withdraw(nil, nil, nil)
       assert {:error, :wrong_arguments} = ExBanking.withdraw("user_withdraw", -12, "brl")
     end
+
+    test "should return not negative when withdraw more than they have" do
+      user_more_withdraw = "User More Withdraw"
+      ExBanking.create_user(user_more_withdraw)
+      ExBanking.deposit(user_more_withdraw, 20.0, "brl")
+      assert {:error, :not_enough_money} = ExBanking.withdraw(user_more_withdraw, 30.0, "brl")
+    end
   end
 
   describe "get_balance/2" do
@@ -103,5 +110,18 @@ defmodule ExBankingTest do
 
     assert {:error, :too_many_requests_to_user} =
              ExBanking.deposit(user_operation_a, 10.00, "brl")
+  end
+
+  test "operation: withdraw more than 10 requests" do
+    user_operation_b = "User Operation B"
+    ExBanking.create_user(user_operation_b)
+    ExBanking.deposit(user_operation_b, 100.0, "brl")
+
+    for _ <- 1..10 do
+      ExBanking.withdraw(user_operation_b, 10.00, "brl")
+    end
+
+    assert {:error, :too_many_requests_to_user} =
+             ExBanking.withdraw(user_operation_b, 10.00, "brl")
   end
 end

@@ -1,5 +1,5 @@
 defmodule OperationsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   test "insert a operation" do
     Operation.insert("user_a", "deposit")
